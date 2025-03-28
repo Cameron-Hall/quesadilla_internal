@@ -45,50 +45,61 @@ def menu(incl_ingredients, no_incl_ingredients, incl_tiers, no_incl_tiers, incl_
     print()
 
 
-def place_order():
-    order = []
+def place_order(order):
     while True:
-        item = input("Choose an item from the menu to add to your order. Please use the full name. Substitutions and additions will be processed after item selection\n> ").title()
+        print("Choose an item from the menu to add to your order. Please use the full name.", end=" ")
+        item = input("Alternatively, type 'pass' to not add anything new to your order\n> ")
         if item not in quesadilla_names:
             print("That isn't an item on the menu")
         else:
-            break
+            order.append([item,[],[]])
+            return order
+
+
+def change_order():
+    print("How would you like to adjust your order?")
+
+
+def remove_ingredient(item):
     if quesadillas[quesadilla_names.index(item)][1] in [BASIC, SUPERIOR]:
         print(f"You are not allowed to remove items from {quesadillas[quesadilla_names.index(item)][1][1]} quesadillas.")
     else:
         print(f"Would you like to remove anything from this quesadilla? This quesadilla contains {quesadillas[quesadilla_names.index(item)][-1]}\nList any items you'd like to remove one at a time, or type 'none' if you'd like to keep the quesadilla as is.")
-    removal_list = []
-    while True:
-        if quesadillas[quesadilla_names.index(item)][1] in [BASIC, SUPERIOR]:
-            break
-        removal = input(">  ").lower()
-        if removal not in quesadillas[quesadilla_names.index(item)][-2] and removal != "none" and removal != "reset":
-            print(f"That's not an item in the {item} quesadilla. The items in this quesadilla are {quesadillas[quesadilla_names.index(item)][-1]}")
-        else:
-            if removal == "none":
+        removal_list = []
+        while True:
+            if quesadillas[quesadilla_names.index(item)][1] in [BASIC, SUPERIOR]:
                 break
-            elif removal == "reset":
-                print(f"Quesadilla reset to original ingredients. It now contains {quesadillas[quesadilla_names.index(item)][-1]}.")
-                removal_list = []
+            removal = input(">  ").lower()
+            if removal not in quesadillas[quesadilla_names.index(item)][-2] and removal != "none":
+                print(f"That's not an item in the {item} quesadilla. The items in this quesadilla are {quesadillas[quesadilla_names.index(item)][-1]}")
             else:
-                removal_list.append(removal)
-                if quesadillas[quesadilla_names.index(item)][1] == REGULAR:
+                if removal == "none":
                     break
-        print(f"Choose an item (out of {', '.join(set(quesadillas[quesadilla_names.index(item)][-2])^set(removal_list))}) to remove, type none to keep the quesadilla as is or type 'reset' to reset the quesadilla to its original ingredients.")
+                else:
+                    removal_list.append(removal)
+                    if quesadillas[quesadilla_names.index(item)][1] == REGULAR:
+                        break
+            print(f"Choose an item (out of {', '.join(set(quesadillas[quesadilla_names.index(item)][-2])^set(removal_list))}) to remove, type 'none' to keep the quesadilla as is or type 'reset' to reset the quesadilla to its original ingredients.")
 
-    print(quesadillas[quesadilla_names.index(item)][-1])
-    print(removal_list)
-
-            
+        print(quesadillas[quesadilla_names.index(item)][-1])
+        print(removal_list)
 
 
-
-            
+def finalise_order():
+    print("Order complete")
 
 
 def main():
-    menu([],[],[],[],bool)
-    place_order()
-
+    order = []
+    while True:
+        choice = input("> ")
+        if choice == "1":
+            menu([],[],[],[],bool)
+        elif choice == "2":
+            place_order(order)
+        elif choice == "3":
+            change_order(order)
+        elif choice == "4":
+            finalise_order(order)
 
 main()
