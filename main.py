@@ -48,7 +48,7 @@ def menu(incl_ingredients, no_incl_ingredients, incl_tiers, no_incl_tiers, incl_
 def place_order(order):
     while True:
         print("Choose an item from the menu to add to your order. Please use the full name.", end=" ")
-        item = input("Alternatively, type 'pass' to not add anything new to your order\n> ")
+        item = input("Alternatively, type 'pass' to not add anything new to your order\n> ").title()
         if item not in quesadilla_names:
             print("That isn't an item on the menu")
         else:
@@ -56,8 +56,39 @@ def place_order(order):
             return order
 
 
-def change_order():
+def change_order(order):
+    print("Your order currently contains:")
+    loop_num = 1
+    for item in order:
+        if item[1] or item[2]:
+            print(f"{loop_num}. {item[0]}", end = " - ")
+        else:
+            print(f"{loop_num}. {item[0]}")
+        if item[1]:
+            print("without ")
+            for removal in item[1]:
+                if removal == item[1][-1] and item[2]:
+                    print(removal, end= ", ")
+                elif not item[2]:
+                    print(removal)
+                else:
+                    print(removal, end= " and ")
+        if item[2]:
+            print("with ")
+            for addition in item[2]:
+                if addition == item[2][-1]:
+                    print(addition, end= ", ")
+                else:
+                    print(addition)
+        loop_num += 1
+    choice = input("Which item from your order would you like to adjust? Enter just the number of the item as listed.")
+
+    
+
     print("How would you like to adjust your order?")
+    choice = input("> ")
+    if choice == "1":
+        remove_ingredient()
 
 
 def remove_ingredient(item):
