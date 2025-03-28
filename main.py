@@ -57,38 +57,53 @@ def place_order(order):
 
 
 def change_order(order):
-    print("Your order currently contains:")
-    loop_num = 1
-    for item in order:
-        if item[1] or item[2]:
-            print(f"{loop_num}. {item[0]}", end = " - ")
+    while True:
+        print("Your order currently contains:")
+        loop_num = 1
+        for item in order:
+            if item[1] or item[2]:
+                print(f"{loop_num}. {item[0]}", end = " - ")
+            else:
+                print(f"{loop_num}. {item[0]}")
+            if item[1]:
+                print("without ")
+                for removal in item[1]:
+                    if removal == item[1][-1] and item[2]:
+                        print(removal, end= ", ")
+                    elif not item[2]:
+                        print(removal)
+                    else:
+                        print(removal, end= " and ")
+            if item[2]:
+                print("with ")
+                for addition in item[2]:
+                    if addition == item[2][-1]:
+                        print(addition, end= ", ")
+                    else:
+                        print(addition)
+            loop_num += 1
+        try:
+            adjusted_item = int(input("Which item from your order would you like to adjust? Enter just the number of the item as listed, or enter '0' to head back to the main menu.\n> "))
+            if adjusted_item > len(order):
+                raise ValueError
+        except ValueError:
+            print(f"Invalid entry. Please enter a number between 0 and {len(order)}")
+        print("hi")
+        if adjusted_item == 0:
+            pass
         else:
-            print(f"{loop_num}. {item[0]}")
-        if item[1]:
-            print("without ")
-            for removal in item[1]:
-                if removal == item[1][-1] and item[2]:
-                    print(removal, end= ", ")
-                elif not item[2]:
-                    print(removal)
-                else:
-                    print(removal, end= " and ")
-        if item[2]:
-            print("with ")
-            for addition in item[2]:
-                if addition == item[2][-1]:
-                    print(addition, end= ", ")
-                else:
-                    print(addition)
-        loop_num += 1
-    choice = input("Which item from your order would you like to adjust? Enter just the number of the item as listed.")
+            print(f"You are now editing item {adjusted_item}")
+            choice = input("1. Add ingredients\n2. Remove ingredients\n3. Remove item\n> ")
+            if choice == "1":
+                # add_ingredient()
+                pass
+            elif choice == "2":
+                remove_ingredient()
+            elif choice == "3":
+                print(f"Item {adjusted_item}")
+                order.pop(adjusted_item-1)
 
-    
 
-    print("How would you like to adjust your order?")
-    choice = input("> ")
-    if choice == "1":
-        remove_ingredient()
 
 
 def remove_ingredient(item):
@@ -112,9 +127,6 @@ def remove_ingredient(item):
                         break
             print(f"Choose an item (out of {', '.join(set(quesadillas[quesadilla_names.index(item)][-2])^set(removal_list))}) to remove, type 'none' to keep the quesadilla as is or type 'reset' to reset the quesadilla to its original ingredients.")
 
-        print(quesadillas[quesadilla_names.index(item)][-1])
-        print(removal_list)
-
 
 def finalise_order():
     print("Order complete")
@@ -123,7 +135,7 @@ def finalise_order():
 def main():
     order = []
     while True:
-        choice = input("> ")
+        choice = input("1. View menu\n2. Add items to order\n3. Edit parts of your order\n4. Finalise your order\n> ")
         if choice == "1":
             menu([],[],[],[],bool)
         elif choice == "2":
@@ -132,5 +144,7 @@ def main():
             change_order(order)
         elif choice == "4":
             finalise_order(order)
+        else:
+            print("Invalid entry.")
 
 main()
