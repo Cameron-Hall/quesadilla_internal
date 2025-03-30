@@ -29,7 +29,7 @@ extras = [[2, ["cheese", "salsa"], "cheese, salsa"],
           ]
 
 
-def menu(incl_ingredients, no_incl_ingredients, incl_tiers, no_incl_tiers, incl_extras):
+def menu():
     current_menu = quesadillas 
     print(f"{BOLD + '         Q U E E N S T O W N' + RESET:^73}")
     print(f"{BOLD + '         Q U E S A D I L L A S' + RESET:^73}\n")
@@ -43,30 +43,45 @@ def menu(incl_ingredients, no_incl_ingredients, incl_tiers, no_incl_tiers, incl_
             print(f"\033[1m\033[4m{current_menu[i][0]:<{WIDTH}}{current_menu[i][1][0]}\033[0m | \033[1m\033[4m{current_menu[i+1][0]:<{WIDTH}}{current_menu[i+1][1][0]}\033[0m")
             print(f"{current_menu[i][3]:<{WIDTH+2}} | {current_menu[i+1][3]:<{WIDTH+2}}\n{' '*(WIDTH+2)} |")
     print()
+    choice = input("Would you like to view the menu with any filters (Y/N) ?\n> ")
+
 
 
 def place_order(order):
+    
     while True:
         print("Choose an item from the menu to add to your order. Please use the full name.", end=" ")
-        item = input("Alternatively, type 'pass' to not add anything new to your order\n> ").title()
-        if item not in quesadilla_names:
+        item = input("Alternatively, type 'pass' to not add anything new to your order, or 'menu' to have another look at the menu\n> ").title()
+        if item == "Pass":
+            pass
+        elif item == "Menu":
+            menu()
+        elif item not in quesadilla_names:
             print("That isn't an item on the menu")
         else:
-            order.append([item,[],[]])
+            order.append([item,[0,[]],[0,[]]])
             return order
 
 
 def change_order(order):
+
+    if not order:
+        print("You can't edit parts of your order, it's empty!")
+        pass
+
     while True:
         print("Your order currently contains:")
         loop_num = 1
+
         for item in order:
             if item[1] or item[2]:
                 print(f"{loop_num}. {item[0]}", end = " - ")
             else:
                 print(f"{loop_num}. {item[0]}")
+
             if item[1]:
                 print("without ")
+
                 for removal in item[1]:
                     if removal == item[1][-1] and item[2]:
                         print(removal, end= ", ")
@@ -74,29 +89,36 @@ def change_order(order):
                         print(removal)
                     else:
                         print(removal, end= " and ")
+
             if item[2]:
                 print("with ")
+
                 for addition in item[2]:
                     if addition == item[2][-1]:
                         print(addition, end= ", ")
                     else:
                         print(addition)
+
             loop_num += 1
+
         try:
             adjusted_item = int(input("Which item from your order would you like to adjust? Enter just the number of the item as listed, or enter '0' to head back to the main menu.\n> "))
+
             if adjusted_item > len(order):
                 raise ValueError
+            
         except ValueError:
             print(f"Invalid entry. Please enter a number between 0 and {len(order)}")
+
         print("hi")
         if adjusted_item == 0:
             pass
+
         else:
             print(f"You are now editing item {adjusted_item}")
             choice = input("1. Add ingredients\n2. Remove ingredients\n3. Remove item\n> ")
             if choice == "1":
-                # add_ingredient()
-                pass
+                add_ingredient()
             elif choice == "2":
                 remove_ingredient()
             elif choice == "3":
@@ -104,6 +126,8 @@ def change_order(order):
                 order.pop(adjusted_item-1)
 
 
+def add_ingredient(item):
+    pass
 
 
 def remove_ingredient(item):
@@ -128,8 +152,12 @@ def remove_ingredient(item):
             print(f"Choose an item (out of {', '.join(set(quesadillas[quesadilla_names.index(item)][-2])^set(removal_list))}) to remove, type 'none' to keep the quesadilla as is or type 'reset' to reset the quesadilla to its original ingredients.")
 
 
-def finalise_order():
-    print("Order complete")
+def finalise_order(order):
+    if not order:
+        print("Your order is empty!")
+        pass
+    else:
+        print("Order complete")
 
 
 def main():
@@ -137,9 +165,9 @@ def main():
     while True:
         choice = input("1. View menu\n2. Add items to order\n3. Edit parts of your order\n4. Finalise your order\n> ")
         if choice == "1":
-            menu([],[],[],[],bool)
+            menu()
         elif choice == "2":
-            place_order(order)
+            order = place_order(order)
         elif choice == "3":
             change_order(order)
         elif choice == "4":
