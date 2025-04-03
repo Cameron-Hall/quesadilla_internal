@@ -10,19 +10,23 @@ BOLD = "\033[1m"
 UNDERLINE = "\033[4m"
 RESET = "\033[0m"
 
-quesadillas = [("Plain Beef", BASIC, ("beef"), "beef"),
-               ("Chicken", BASIC, ("chicken"), "chicken"),
-               ("Vegetarian", BASIC, ("peppers", "beans"), "pepper and beans"),
-               ("Cheesy Beef", REGULAR, ("beef", "cheese"), "beef and cheese"),
-               ("Beef & Beans", REGULAR, ("beef", "beans"), "beef and beans"),
-               ("Spicy Chicken", REGULAR, ("chicken", "jalapenos", "salsa"), "chicken, jalapenos and salsa"),
-               ("Market Fish", REGULAR, ("fish", "capers"), "fish and capers"),
-               ("The Pablo", SUPERIOR, ("chicken", "beans", "jalapenos", "salsa"), "chicken, beans, jalapenos and salsa"),
-               ("The Bass", SUPERIOR, ("fish", "capers", "jalapenos", "chutney"), "fish, capers, jalapenos and chutney"),
-               ("The Joe", SUPERIOR, ("beef", "peppers", "cheese", "salsa"), "beef, peppers, cheese and salsa")
+order = []
+
+quesadillas = [["Plain Beef", BASIC, ["beef"], "beef"],
+               ["Chicken", BASIC, ["chicken"], "chicken"],
+               ["Vegetarian", BASIC, ["peppers", "beans"], "pepper and beans"],
+               ["Cheesy Beef", REGULAR, ["beef", "cheese"], "beef and cheese"],
+               ["Beef & Beans", REGULAR, ["beef", "beans"], "beef and beans"],
+               ["Spicy Chicken", REGULAR, ["chicken", "jalapenos", "salsa"], "chicken, jalapenos and salsa"],
+               ["Market Fish", REGULAR, ["fish", "capers"], "fish and capers"],
+               ["The Pablo", SUPERIOR, ["chicken", "beans", "jalapenos", "salsa"], "chicken, beans, jalapenos and salsa"],
+               ["The Bass", SUPERIOR, ["fish", "capers", "jalapenos", "chutney"], "fish, capers, jalapenos and chutney"],
+               ["The Joe", SUPERIOR, ["beef", "peppers", "cheese", "salsa"], "beef, peppers, cheese and salsa"]
                ]
 
 quesadilla_names = ['Plain Beef', 'Chicken', 'Vegetarian', 'Cheesy Beef', 'Beef & Beans', 'Spicy Chicken', 'Market Fish', 'The Pablo', 'The Bass', 'The Joe']
+
+ingredients = ['beans', 'beef', 'capers', 'cheese', 'chicken', 'chutney', 'fish', 'jalapenos', 'peppers', 'salsa']
 
 extras = [[2, ["cheese", "salsa"], "cheese, salsa"],
           [3, ["beans", "peppers"], "peppers, beans"],
@@ -30,11 +34,20 @@ extras = [[2, ["cheese", "salsa"], "cheese, salsa"],
           [5, ["beef", "chicken"], "beef, chicken"]
           ]
 
-filters = [0, [], ["",True]]
-filtered = []
+filters = ["", []]
+price_filtered = []
+ingredient_filtered = []
 
-def menu(filter_bool):
-    current_menu = [item for item in quesadillas if item not in filtered]
+
+def menu(filter_bool, price_filtered, ingredient_filtered, filters):
+    menu_reset = False
+    os.system('cls')
+    current_menu = [item for item in quesadillas if item not in price_filtered and item not in ingredient_filtered]
+    if current_menu == []:
+        menu_reset = True
+        price_filtered = []
+        ingredient_filtered = []
+        current_menu = quesadillas
     print(f"{BOLD + '         Q U E E N S T O W N' + RESET:^73}")
     print(f"{BOLD + '         Q U E S A D I L L A S' + RESET:^73}\n")
     print(f"{BOLD + '         M E N U' + RESET:^73}")
@@ -46,81 +59,123 @@ def menu(filter_bool):
         else:
             print(f"\033[1m\033[4m{current_menu[i][0]:<{WIDTH}}{current_menu[i][1][0]}\033[0m | \033[1m\033[4m{current_menu[i+1][0]:<{WIDTH}}{current_menu[i+1][1][0]}\033[0m")
             print(f"{current_menu[i][3]:<{WIDTH+2}} | {current_menu[i+1][3]:<{WIDTH+2}}\n{' '*(WIDTH+2)} |")
-    print()
 
-    if filter_bool and filtered:
-        print(f"Your current filters are:\nPrice: {filters[0]}\nIngredients: {filters[1].join(", ")}\n\nType R to remove all filters or Y to add another filter")
-
-    elif filter_bool:
-        choice = input("Would you like to view the menu with any filters (Y/N) ?\n> ").upper()
-
+    if filters == ["", []]:
+        more = ''
     else:
-        input("Press enter to continue")
+        if menu_reset:
+            print("Your filters make the menu empty. Full menu will be shown")
+            menu_reset = False
+        print("Filters active: ")
+        if filters[0] != "":
+            print(f"Price range: {filters[0]}")
+        if filters[1] != []:
+            print(f"Removed ingredients: {', '.join(filters[1])}")
+        more = "more "
+        print()
 
-    while True:
-        if not filter_bool:
-            break
+    if filter_bool:
+        choice = input(f"Would you like to view the menu with any {more}filters? (Y/N)\nAlternatively, type 'reset' to remove all filters\n> ").upper()
 
-        if choice not in ["Y", "YES", "N", "NO", "R"]:
-            print("Invalid entry, please enter Y or N to indicate yes or no.")
-
-        else:
-            if choice in ["Y", "YES"]:
-                while True:
-                    choice = input("What would you like to filter by?\n1. Price\n2. Ingredients\n3. Back to menu\n> ")
-
-                    if choice not in ["1", "2", "3"]:
-                        print("Invalid entry.")
-
-                    elif choice == "1":
-
-                        while True:
-                            price_range = input("What price range would you like to filter with? Separate your minimum and maximum value with a hyphen, like this: 10-14\n> ")
-                            price_range = price_range.replace(" ","")
-                            try:
-                                hyphen_loc = price_range.index('-')
-                            except ValueError:
-                                print("Invalid entry. Please ensure your minimum and maximum price values are separated by a hyphen.")
-                                continue
-                            try:
-                                minimum = int(price_range[:hyphen_loc])
-                                if 0 > minimum or minimum > 100:
-                                    raise ValueError
-                                else:
-                                    maximum = int(price_range[hyphen_loc+1:])
-                                    if 0 > maximum or maximum > 100:
-                                        raise ValueError
-                                    else:
-                                        break
-                            except ValueError:
-                                print("Invalid entry. Please ensure you use whole numbers greater than 0 and less than 100.")
-                        for quesadilla in quesadillas:
-                            if maximum >= quesadilla[1][0] and minimum <= quesadilla[1][0]:
-                                pass
-                            else:
-                                filtered.append(quesadilla)
-                                filters[0] = "10-14"
-                        
-                        menu(True)
-
-            elif choice == "R":
-                filters = [0, [], ["",True]]
-                filtered = []
+        while True:
+            if choice not in ["Y", "YES", "N", "NO", "RESET"]:
+                choice = input("Invalid entry, please enter yes, no or reset.\n> ").upper()
 
             else:
-                os.system('clear')
-                menu(False) 
+                if choice in ["Y", "YES"]:
+                    while True:
+                        choice = input("What would you like to filter by?\n1. Price\n2. Ingredients\n3. Back to menu\n> ")
+
+                        if choice not in ["1", "2", "3"]:
+                            print("Invalid entry.")
+                            continue
+
+                        elif choice == "1":
+
+                            while True:
+                                price_filtered = []
+                                price_range = input("What price range would you like to filter with? Separate your minimum and maximum value with a hyphen, like this: 10-14\n> ")
+                                filters[0] = ""
+                                price_range = price_range.replace(" ","")
+                                try:
+                                    hyphen_loc = price_range.index('-')
+                                except ValueError:
+                                    print("Invalid entry. Please ensure your minimum and maximum price values are separated by a hyphen.")
+                                    continue
+                                try:
+                                    error = ""
+                                    minimum = int(price_range[:hyphen_loc])
+                                    if 0 > minimum or minimum > 100:
+                                        error = "Please ensure values are greater than 0 and less than 100"
+                                        raise ValueError
+                                    else:
+                                        maximum = int(price_range[hyphen_loc+1:])
+                                        if 0 > maximum or maximum > 100:
+                                            error = "Please ensure values are greater than 0 and less than 100"
+                                            raise ValueError
+                                        elif maximum < minimum:
+                                            error = "Please ensure maximum value is greater or equal to minimum value"
+                                            raise ValueError
+                                        else:
+                                            break
+                                except ValueError:
+                                    print("Invalid entry. " + error + "\n")
+                            for quesadilla in quesadillas:
+                                if maximum >= quesadilla[1][0] and minimum <= quesadilla[1][0]:
+                                    pass
+                                else:
+                                    price_filtered.append(quesadilla)
+                                    filters[0] = price_range
+                            choice = "Y" 
+                            filter_bool = True
+
+                        elif choice == "2":
+                            while True:
+                                exclusion = input("Which ingredients would you like to exclude items with from the menu?\n> ").lower().replace(" ","")
+                                if exclusion not in ingredients:
+                                    print("That's not an item on the menu")
+                                    continue
+                                else:
+                                    filters[1].append(exclusion)
+                                    for quesadilla in quesadillas:
+                                        for ingredient in quesadilla[2]:
+                                            if ingredient in filters[1]:
+                                                ingredient_filtered.append(quesadilla)
+                                break
+                            choice = "Y" 
+                            filter_bool = True
+                            
+                        elif choice == "3":
+                            choice = "N"    
+                            filter_bool = False
+
+                        break
+                            
+                elif choice == "RESET":
+                    filters = ["", []]
+                    price_filtered = []
+                    ingredient_filtered = []
+                
+                elif choice in ["N", "NO"]:
+                    filter_bool = False
+
+                os.system('cls')
+                menu(filter_bool, price_filtered, ingredient_filtered, filters) 
+    
+    else:
+        input("\nPress enter to continue\n")
+        main()
 
 
 def place_order(order):
     
     while True:
-        print("Choose an item from the menu to add to your order. Please use the full name.", end=" ")
+        print("Choose an item from the menu to add to your order. Please use the full name.")
         item = input("Alternatively, type 'pass' to not add anything new to your order, or 'menu' to have another look at the menu\n> ").title()
         if item == "Pass":
             pass
         elif item == "Menu":
-            menu()
+            menu(True, price_filtered, ingredient_filtered, filters)
         elif item not in quesadilla_names:
             print("That isn't an item on the menu")
         else:
@@ -129,12 +184,11 @@ def place_order(order):
 
 
 def change_order(order):
-
-    if not order:
-        print("You can't edit parts of your order, it's empty!")
-        pass
-
     while True:
+        if not order:
+            print("You can't edit parts of your order, it's empty!")
+            break
+
         print("Your order currently contains:")
         loop_num = 1
 
@@ -208,12 +262,13 @@ def finalise_order(order):
 
 
 def main():
-    order = []
+    global order
+    os.system("cls")
     while True:
         choice = input("1. View menu\n2. Add items to order\n3. Edit parts of your order\n4. Finalise your order\n> ")
 
         if choice == "1":
-            menu(True)
+            menu(True, price_filtered, ingredient_filtered, filters)
 
         elif choice == "2":
             order = place_order(order)
