@@ -1,7 +1,9 @@
+"""Quesadilla ordering system."""
 import os
+import time
 
-BASIC = [10,"Basic"]
-REGULAR = [12,"Regular"]
+BASIC = [10, "Basic"]
+REGULAR = [12, "Regular"]
 SUPERIOR = [16, "Superior"]
 
 WIDTH = 33
@@ -34,241 +36,192 @@ extras = [[2, ["cheese", "salsa"], "cheese, salsa"],
           [5, ["beef", "chicken"], "beef, chicken"]
           ]
 
-filters = ["", []]
-price_filtered = []
-ingredient_filtered = []
 
-
-def menu(filter_bool, price_filtered, ingredient_filtered, filters):
-    menu_reset = False
+def menu():
+    """Print the menu of quesadillas."""
     os.system('cls')
-    current_menu = [item for item in quesadillas if item not in price_filtered and item not in ingredient_filtered]
-    if current_menu == []:
-        menu_reset = True
-        price_filtered = []
-        ingredient_filtered = []
-        current_menu = quesadillas
     print(f"{BOLD + '         Q U E E N S T O W N' + RESET:^73}")
     print(f"{BOLD + '         Q U E S A D I L L A S' + RESET:^73}\n")
     print(f"{BOLD + '         M E N U' + RESET:^73}")
     print(f"{' '*(WIDTH+2)} |")
-    for i in range(0,len(current_menu),2):
-        if current_menu[i] == current_menu[-1]:
-            print(f"\033[1m\033[4m{current_menu[i][0]:<{WIDTH}}{current_menu[i][1][0]}\033[0m |")
-            print(f"{current_menu[i][3]:<{WIDTH+2}} |\n{' '*(WIDTH+2)} |")
+    for i in range(0, len(quesadillas), 2):
+        if quesadillas[i] == quesadillas[-1]:
+            print(f"\033[1m\033[4m{quesadillas[i][0]:<{WIDTH}}{quesadillas[i][1][0]}\033[0m |")
+            print(f"{quesadillas[i][3]:<{WIDTH+2}} |\n{' '*(WIDTH+2)} |")
         else:
-            print(f"\033[1m\033[4m{current_menu[i][0]:<{WIDTH}}{current_menu[i][1][0]}\033[0m | \033[1m\033[4m{current_menu[i+1][0]:<{WIDTH}}{current_menu[i+1][1][0]}\033[0m")
-            print(f"{current_menu[i][3]:<{WIDTH+2}} | {current_menu[i+1][3]:<{WIDTH+2}}\n{' '*(WIDTH+2)} |")
+            print(f"\033[1m\033[4m{quesadillas[i][0]:<{WIDTH}}{quesadillas[i][1][0]}\033[0m | \033[1m\033[4m{quesadillas[i+1][0]:<{WIDTH}}{quesadillas[i+1][1][0]}\033[0m")
+            print(f"{quesadillas[i][3]:<{WIDTH+2}} | {quesadillas[i+1][3]:<{WIDTH+2}}\n{' '*(WIDTH+2)} |")
+    input("\nPress enter to continue\n")
 
-    if filters == ["", []]:
-        more = ''
+
+def print_item(item):
+    """Print a specific item passed into the function, including 'with' and 'without' added items."""
+    if item[2][0] == 0:
+        without = ""
     else:
-        if menu_reset:
-            print("Your filters make the menu empty. Full menu will be shown")
-            menu_reset = False
-        print("Filters active: ")
-        if filters[0] != "":
-            print(f"Price range: {filters[0]}")
-        if filters[1] != []:
-            print(f"Removed ingredients: {', '.join(filters[1])}")
-        more = "more "
-        print()
-
-    if filter_bool:
-        choice = input(f"Would you like to view the menu with any {more}filters? (Y/N)\nAlternatively, type 'reset' to remove all filters\n> ").upper()
-
-        while True:
-            if choice not in ["Y", "YES", "N", "NO", "RESET"]:
-                choice = input("Invalid entry, please enter yes, no or reset.\n> ").upper()
-
-            else:
-                if choice in ["Y", "YES"]:
-                    while True:
-                        choice = input("What would you like to filter by?\n1. Price\n2. Ingredients\n3. Back to menu\n> ")
-
-                        if choice not in ["1", "2", "3"]:
-                            print("Invalid entry.")
-                            continue
-
-                        elif choice == "1":
-
-                            while True:
-                                price_filtered = []
-                                price_range = input("What price range would you like to filter with? Separate your minimum and maximum value with a hyphen, like this: 10-14\n> ")
-                                filters[0] = ""
-                                price_range = price_range.replace(" ","")
-                                try:
-                                    hyphen_loc = price_range.index('-')
-                                except ValueError:
-                                    print("Invalid entry. Please ensure your minimum and maximum price values are separated by a hyphen.")
-                                    continue
-                                try:
-                                    error = ""
-                                    minimum = int(price_range[:hyphen_loc])
-                                    if 0 > minimum or minimum > 100:
-                                        error = "Please ensure values are greater than 0 and less than 100"
-                                        raise ValueError
-                                    else:
-                                        maximum = int(price_range[hyphen_loc+1:])
-                                        if 0 > maximum or maximum > 100:
-                                            error = "Please ensure values are greater than 0 and less than 100"
-                                            raise ValueError
-                                        elif maximum < minimum:
-                                            error = "Please ensure maximum value is greater or equal to minimum value"
-                                            raise ValueError
-                                        else:
-                                            break
-                                except ValueError:
-                                    print("Invalid entry. " + error + "\n")
-                            for quesadilla in quesadillas:
-                                if maximum >= quesadilla[1][0] and minimum <= quesadilla[1][0]:
-                                    pass
-                                else:
-                                    price_filtered.append(quesadilla)
-                                    filters[0] = price_range
-                            choice = "Y" 
-                            filter_bool = True
-
-                        elif choice == "2":
-                            while True:
-                                exclusion = input("Which ingredients would you like to exclude items with from the menu?\n> ").lower().replace(" ","")
-                                if exclusion not in ingredients:
-                                    print("That's not an item on the menu")
-                                    continue
-                                else:
-                                    filters[1].append(exclusion)
-                                    for quesadilla in quesadillas:
-                                        for ingredient in quesadilla[2]:
-                                            if ingredient in filters[1]:
-                                                ingredient_filtered.append(quesadilla)
-                                break
-                            choice = "Y" 
-                            filter_bool = True
-                            
-                        elif choice == "3":
-                            choice = "N"    
-                            filter_bool = False
-
-                        break
-                            
-                elif choice == "RESET":
-                    filters = ["", []]
-                    price_filtered = []
-                    ingredient_filtered = []
-                
-                elif choice in ["N", "NO"]:
-                    filter_bool = False
-
-                os.system('cls')
-                menu(filter_bool, price_filtered, ingredient_filtered, filters) 
-    
+        without = f", without {', '.join(item[2][1])}"
+    if item[1][0] == 0:
+        added = ""
     else:
-        input("\nPress enter to continue\n")
-        main()
+        added = f", with added {', '.join(item[1][1])}"
+
+    return f"{item[0]}{without}{added}"
+
+
+def print_order(order):
+    """Print the full order."""
+    print("Your order currently contains:")
+    for i in range(len(order)):
+        print(f"{i+1}. {print_item(order[i])}")
 
 
 def place_order(order):
-    
+    """Add items to their current order."""
     while True:
+        os.system('cls')
         print("Choose an item from the menu to add to your order. Please use the full name.")
-        item = input("Alternatively, type 'pass' to not add anything new to your order, or 'menu' to have another look at the menu\n> ").title()
-        if item == "Pass":
-            pass
-        elif item == "Menu":
-            menu(True, price_filtered, ingredient_filtered, filters)
-        elif item not in quesadilla_names:
-            print("That isn't an item on the menu")
+        item_name = input("Alternatively, type 'pass' to not add anything new to your order, or 'menu' to have another look at the menu\n> ").title()
+        if item_name == "Pass":
+            break
+        elif item_name == "Menu":
+            menu()
+        elif item_name not in quesadilla_names:
+            input("That isn't an item on the menu. Press enter to continue")
         else:
-            order.append([item,[0,[]],[0,[]]])
-            return order
+            order.append([item_name, [0, []], [0, []]])
+            print(item_name, "added to order.")
+            time.sleep(1.5)
+            break
+
+    return order
 
 
 def change_order(order):
+    """Select items in their order to edit or adjust."""
     while True:
         if not order:
-            print("You can't edit parts of your order, it's empty!")
+            edited_item = "home"
             break
+        os.system('cls')
+        print_order(order)
+        edited_item = input("Which item from your order would you like to adjust? Enter just the number of the item as listed, or enter 'home' to head back to the home page.\n> ").lower().replace(" ", "")
 
-        print("Your order currently contains:")
-        loop_num = 1
+        if not edited_item.isnumeric() and edited_item != "home":
+            input("Invalid entry. Press enter to continue")
 
-        for item in order:
-            if item[1] or item[2]:
-                print(f"{loop_num}. {item[0]}", end = " - ")
+        elif edited_item.isnumeric():
+            edited_item = int(edited_item)
+            if edited_item > len(order):
+                input("Invalid entry, this number is higher than the number of items in your order. Press enter to continue")
+            elif edited_item == 0:
+                input("Invalid entry. Press enter to continue")
             else:
-                print(f"{loop_num}. {item[0]}")
-
-            if item[1]:
-                print("without ")
-
-                for removal in item[1]:
-                    if removal == item[1][-1] and item[2]:
-                        print(removal, end= ", ")
-                    elif not item[2]:
-                        print(removal)
-                    else:
-                        print(removal, end= " and ")
-
-            if item[2]:
-                print("with ")
-
-                for addition in item[2]:
-                    if addition == item[2][-1]:
-                        print(addition, end= ", ")
-                    else:
-                        print(addition)
-
-            loop_num += 1
-
-        try:
-            adjusted_item = int(input("Which item from your order would you like to adjust? Enter just the number of the item as listed, or enter '0' to head back to the main menu.\n> "))
-
-            if adjusted_item > len(order):
-                raise ValueError
-            
-        except ValueError:
-            print(f"Invalid entry. Please enter a number between 0 and {len(order)}")
-
-        print("hi")
-        if adjusted_item == 0:
-            pass
+                break
 
         else:
-            print(f"You are now editing item {adjusted_item}")
-            choice = input("1. Add ingredients\n2. Remove ingredients\n3. Remove item\n> ")
-            if choice == "1":
-                add_ingredient()
-            elif choice == "2":
-                remove_ingredient()
-            elif choice == "3":
-                print(f"Item {adjusted_item}")
-                order.pop(adjusted_item-1)
+            break
+
+    while True:
+        os.system('cls')
+        if edited_item == "home":
+            break
+
+        print(f"You are now editing item {edited_item} - {print_item(order[edited_item-1])}")
+        try:
+            choice = int(input("How would you like to edit your order?\n1. Add ingredients\n2. Remove ingredients\n3. Delete item\n4. Back to homepage\n> "))
+        except ValueError:
+            print("Invalid entry. Ensure your entry is one of the shown options.")
+            time.sleep(1.5)
+            continue
+
+        if choice == 1:
+            add_ingredient(edited_item, order)
+        elif choice == 2:
+            remove_ingredient(edited_item, order)
+        elif choice == 3:
+            order.pop(edited_item-1)
+        elif choice == 4:
+            pass
+        else:
+            print("Invalid entry.")
+            time.sleep(1.5)
+            continue
+
+        break
 
 
-def add_ingredient(item):
-    pass
+def add_ingredient(item, order):
+    """Add ingredients to individual items on their order."""
+    item = item-1
+    while True:
+        os.system('cls')
+        item_ingredients = (list((set(quesadillas[quesadilla_names.index(order[item][0])][2])) ^ set(order[item][2][1]))) + order[item][1][1]
+        print(f"What ingredient would you like to add to item {item+1} - {print_item(order[item])}?")
+        print(f"It currently contains {', '.join(item_ingredients)}")
+        addition = input(f"You can add any of the following, for $3 each:\n{', '.join(ingredients)}\n> ").lower()
+        if addition not in ingredients:
+            print("That's not an eligible addition.")
+            time.sleep(1.5)
+            continue
+        elif addition in order[item][2][1]:
+            order[item][2][1].remove(addition)
+            order[item][2][0] -= 1
+        else:
+            order[item][1][1].append(addition)
+            order[item][1][0] += 1
+        print(f"{addition.title()} added to item.")
+        time.sleep(1.5)
+        break
 
 
-def remove_ingredient(item):
-    pass
+def remove_ingredient(item, order):
+    """Remove ingredients from individual items on their order."""
+    item = item-1
+    while True:
+        os.system('cls')
+        item_ingredients = (list((set(quesadillas[quesadilla_names.index(order[item][0])][2])) ^ set(order[item][2][1]))) + order[item][1][1]
+        print(f"What ingredient would you like to remove from item {item+1} - {print_item(order[item])}?")
+        removal = input(f"It contains {', '.join(item_ingredients)}\n> ")
+        if removal not in item_ingredients:
+            print("That's not an eligible item.")
+            time.sleep(1.5)
+            continue
+        elif removal in order[item][1][1]:
+            order[item][1][1].remove(removal)
+            order[item][1][0] -= 1
+        else:
+            order[item][2][1].append(removal)
+            order[item][2][0] += 1
+        print(f"{removal.title()} removed from item.")
+        time.sleep(1.5)
+        break
 
 
 def finalise_order(order):
+    """Print final cost and full order."""
     if not order:
         print("Your order is empty!")
-        pass
+        time.sleep(1.5)
+        return False
     else:
-        print("Order complete")
+        print_order(order)
+        total_cost = 0
+        for item in order:
+            total_cost += quesadillas[quesadilla_names.index(item[0])][1][0]
+            total_cost += 3 * item[1][0]
+        print(f"Your order total comes to ${total_cost}")
+        return True
 
 
-def main():
-    global order
+def main(order):
+    """Choose what to do with ordering system"""
     os.system("cls")
     while True:
-        choice = input("1. View menu\n2. Add items to order\n3. Edit parts of your order\n4. Finalise your order\n> ")
-
+        os.system("cls")
+        choice = input("1. View menu\n2. Add items to order\n3. Edit parts of your order\n4. Show order\n5. Finalise your order\n> ")
+        os.system("cls")
         if choice == "1":
-            menu(True, price_filtered, ingredient_filtered, filters)
+            menu()
 
         elif choice == "2":
             order = place_order(order)
@@ -277,9 +230,21 @@ def main():
             change_order(order)
 
         elif choice == "4":
-            finalise_order(order)
+            if not order:
+                print("Your order is empty!")
+                time.sleep(1.5)
+            else:
+                print_order(order)
+                print("Press enter to continue")
+            
+
+        elif choice == "5":
+            if finalise_order(order):
+                break            
 
         else:
             print("Invalid entry.")
+            time.sleep(2)
 
-main()
+
+main(order)
